@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS books (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cite_key TEXT NOT NULL UNIQUE,
+    author TEXT NOT NULL,
+    title TEXT NOT NULL,
+    year INTEGER NOT NULL,
+    publisher TEXT NOT NULL
+);
