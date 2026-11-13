@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+{#
+    Form for adding a book.
+    Field names correspond to the columns of the "books" database table.
+#}
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <title>Lisää kirja</title>
+</head>
+<body>
+    <h1>Lisää kirja</h1>
+
+    <form action="/books" method="post">
+        <label for="cite_key">Viiteavain</label>
+        <input id="cite_key" name="cite_key" type="text" required>
+
+        <label for="author">Tekijä</label>
+        <input id="author" name="author" type="text" required>
+
+        <label for="title">Nimi</label>
+        <input id="title" name="title" type="text" required>
+
+        <label for="year">Julkaisuvuosi</label>
+        <input id="year" name="year" type="number" required>
+
+        <label for="publisher">Kustantaja</label>
+        <input id="publisher" name="publisher" type="text" required>
+
+        <button type="submit">Lisää kirja</button>
+    </form>
+
+    <a href="/">Takaisin etusivulle</a>
+</body>
+</html>
