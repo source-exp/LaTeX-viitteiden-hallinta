@@ -4,6 +4,7 @@
 
 - [Pelisäännöt](docs/pelisaannot.md)
 - [Backlogit](https://github.com/users/source-exp/projects/1)
+- [Lisenssi](LICENSE)
 ## Definition of Done
 
 User story on valmis, kun kaikki seuraavat ehdot täyttyvät:

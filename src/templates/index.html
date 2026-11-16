@@ -8,6 +8,12 @@
         <h1>Viiteluettelo</h1>
         <a href="/books/new">Lisää kirja</a>
 
+        {% with messages = get_flashed_messages() %}
+            {% for message in messages %}
+                <p role="status">{{ message }}</p>
+            {% endfor %}
+        {% endwith %}
+
         {% if books %}
         <table>
             <thead>
