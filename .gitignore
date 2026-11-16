@@ -6,4 +6,5 @@ __pycache__
 *.tmp
 .DS_Store
 .env
+secret.env
 database.db
