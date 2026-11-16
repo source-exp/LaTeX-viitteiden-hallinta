@@ -11,21 +11,30 @@
 <body>
     <h1>Lisää kirja</h1>
 
+    {% if error %}
+        <p role="alert">{{ error }}</p>
+    {% endif %}
+
     <form action="/books" method="post">
         <label for="cite_key">Viiteavain</label>
-        <input id="cite_key" name="cite_key" type="text" required>
+        <input id="cite_key" name="cite_key" type="text"
+               value="{{ form.get('cite_key', '') if form else '' }}" required>
 
         <label for="author">Tekijä</label>
-        <input id="author" name="author" type="text" required>
+        <input id="author" name="author" type="text"
+               value="{{ form.get('author', '') if form else '' }}" required>
 
         <label for="title">Nimi</label>
-        <input id="title" name="title" type="text" required>
+        <input id="title" name="title" type="text"
+               value="{{ form.get('title', '') if form else '' }}" required>
 
         <label for="year">Julkaisuvuosi</label>
-        <input id="year" name="year" type="number" required>
+        <input id="year" name="year" type="number"
+               value="{{ form.get('year', '') if form else '' }}" required>
 
         <label for="publisher">Kustantaja</label>
-        <input id="publisher" name="publisher" type="text" required>
+        <input id="publisher" name="publisher" type="text"
+               value="{{ form.get('publisher', '') if form else '' }}" required>
 
         <button type="submit">Lisää kirja</button>
     </form>
