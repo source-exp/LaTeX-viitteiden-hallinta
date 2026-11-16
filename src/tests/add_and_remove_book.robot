@@ -7,7 +7,7 @@ Suite Teardown  Close Browser
 Add a book
     Homepage
 
-    # The fake should not exist yet.
+    # The fake book should not exist yet.
     Get Text  body  not contains  fake test book
 
     # Add the fake book.
@@ -21,3 +21,16 @@ Add a book
 
     # The fake book should exist now.
     Get Text  body  contains  fake test book
+
+Remove a book
+    Homepage
+
+    # The fake book should exist after the previous test.
+    Get Text  body  contains  fake test book
+
+    # Remove the fake book
+    Handle Future Dialogs  action=accept
+    Click  text=Poista
+
+    # The fake book should not exist anymore.
+    Get Text  body  not contains  fake test book
