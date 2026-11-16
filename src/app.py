@@ -1,11 +1,12 @@
 import flask
 from config import app
-from db_helper import add
+from db_helper import add, get_all
 
 
 @app.route('/')
 def index():
-    return flask.render_template('index.html')
+    books = get_all()
+    return flask.render_template('index.html', books = books)
 
 @app.route("/books/new")
 def new_book():

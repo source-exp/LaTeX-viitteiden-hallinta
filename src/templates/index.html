@@ -4,7 +4,36 @@
         <title>LaTeX viitteiden hallinta</title>
     </head>
 
-    <body>
-        <a href="/books/new">Lisää kirja</a>
     </body>
+        <h1>Viiteluettelo</h1>
+        <a href="/books/new">Lisää kirja</a>
+
+        {% if books %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Viiteavain</th>
+                    <th>Tekijä</th>
+                    <th>Nimi</th>
+                    <th>Vuosi</th>
+                    <th>Kustantaja</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for book in books %}
+                <tr>
+                    <td>{{ book.cite_key }}</td>
+                    <td>{{ book.author }}</td>
+                    <td>{{ book.title }}</td>
+                    <td>{{ book.year }}</td>
+                    <td>{{ book.publisher }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>Ei vielä lisättyjä lähteitä.</p>
+        {% endif %}
+    </body>
+
 </html>
