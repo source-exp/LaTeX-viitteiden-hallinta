@@ -63,6 +63,7 @@ def create_book():
             form=flask.request.form,
         ), 400
 
+    flask.flash("Kirja lisättiin onnistuneesti.")
     return flask.redirect("/")
 
 @app.route("/books/<int:book_id>/delete", methods=["POST"])
