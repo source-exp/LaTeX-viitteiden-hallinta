@@ -9,7 +9,7 @@ spec:
     - name: latest
       from:
         kind: DockerImage
-        name: source-image:latest
+        name: ghcr.io/source-exp/latex-viitteiden-hallinta:latest
       importPolicy:
         scheduled: true
       referencePolicy:
