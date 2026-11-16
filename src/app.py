@@ -1,6 +1,6 @@
 import flask
 from config import app
-from db_helper import add, get_all
+from db_helper import add, get_all, delete
 
 
 @app.route('/')
@@ -25,4 +25,10 @@ def create_book():
         publisher=flask.request.form["publisher"],
     )
 
+    return flask.redirect("/")
+
+@app.route("/books/<int:book_id>/delete", methods=["POST"])
+def delete_book(book_id):
+    """Delete a book and redirect to the front page."""
+    delete(book_id)
     return flask.redirect("/")
