@@ -63,6 +63,13 @@ def add(cite_key, author, title, year, publisher):
     db.session.commit()
     return result.lastrowid
 
+def get_all():
+    """Return all book references, newest first."""
+    sql = text(
+        "SELECT id, cite_key, author, title, year, publisher "
+        "FROM books ORDER BY id DESC"
+    )
+    return db.session.execute(sql).mappings().all()
 
 if __name__ == "__main__":
     with app.app_context():
