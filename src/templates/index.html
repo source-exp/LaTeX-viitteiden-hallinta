@@ -17,6 +17,7 @@
                     <th>Nimi</th>
                     <th>Vuosi</th>
                     <th>Kustantaja</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -27,6 +28,12 @@
                     <td>{{ book.title }}</td>
                     <td>{{ book.year }}</td>
                     <td>{{ book.publisher }}</td>
+                    <td>
+                        <form action="/books/{{ book.id }}/delete" method="post"
+                            onsubmit="return confirm('Poistetaanko lähde?');">
+                            <button type="submit">Poista</button>
+                        </form>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>

@@ -71,6 +71,12 @@ def get_all():
     )
     return db.session.execute(sql).mappings().all()
 
+def delete(book_id):
+    """Delete a book reference by id."""
+    sql = text("DELETE FROM books WHERE id = :id")
+    db.session.execute(sql, {"id": book_id})
+    db.session.commit()
+
 if __name__ == "__main__":
     with app.app_context():
         setup_db()
