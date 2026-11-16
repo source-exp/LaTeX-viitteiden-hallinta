@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# Start the server in the background
+uv run flask --app src/app.py run &
+
+# Run the robot tests
+uv run robot --variable HEADLESS:true src/tests
+
+# Store the exit status
+status=$?
+
+# Kill the server
+kill "$!"
+
+# Return with the correct exit status
+exit "${status}"
