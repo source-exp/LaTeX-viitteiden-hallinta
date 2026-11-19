@@ -77,6 +77,38 @@ def delete(book_id):
     db.session.execute(sql, {"id": book_id})
     db.session.commit()
 
+def search_books(author=None, title=None, year=None):
+    """Search books by author, title and year. All filters are combined."""
+    conditions = []
+    params = {}
+
+    if author and author.strip():
+        conditions.append("LOWER(author) LIKE LOWER(:author)")
+        params["author"] = f"%{author.strip()}%"
+
+    if title and title.strip():
+        conditions.append("LOWER(title) LIKE LOWER(:title)")
+        params["title"] = f"%{title.strip()}%"
+
+    if year:
+        try:
+            year = int(year)
+            conditions.append("year = :year")
+            params["year"] = year
+        except (TypeError, ValueError):
+            pass
+
+    sql = (
+        "SELECT id, cite_key, author, title, year, publisher "
+        "FROM books"
+    )
+
+    if conditions:
+        sql += " WHERE " + " AND ".join(conditions)
+    sql += " ORDER BY id DESC"
+
+    return db.session.execute(text(sql), params).mappings().all()
+
 if __name__ == "__main__":
     with app.app_context():
         setup_db()
