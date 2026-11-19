@@ -63,6 +63,32 @@ def add(cite_key, author, title, year, publisher):
     db.session.commit()
     return result.lastrowid
 
+
+def update(book_id, cite_key, author, title, year, publisher):
+    """Update a book reference by id."""
+    sql = text(
+        """
+        UPDATE books
+        SET cite_key = :cite_key,
+            author = :author,
+            title = :title,
+            year = :year,
+            publisher = :publisher
+        WHERE id = :id
+        """
+    )
+    result = db.session.execute(sql, {
+        "id": book_id,
+        "cite_key": cite_key,
+        "author": author,
+        "title": title,
+        "year": year,
+        "publisher": publisher,
+    })
+    db.session.commit()
+    return result.rowcount
+
+
 def get_all():
     """Return all book references, newest first."""
     sql = text(
