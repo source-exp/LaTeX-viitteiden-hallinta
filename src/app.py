@@ -1,7 +1,9 @@
+import io
 import flask
 from config import app
 from db_helper import add, db, delete, get_all
 from sqlalchemy.exc import IntegrityError
+import bibtex
 
 
 def validate_book_data(form):
@@ -71,3 +73,11 @@ def delete_book(book_id):
     """Delete a book and redirect to the front page."""
     delete(book_id)
     return flask.redirect("/")
+
+@app.route("/bibtex")
+def generate_bibtex():
+    return flask.send_file(
+        io.BytesIO(bibtex.generate(get_all()).encode()),
+        download_name="viitteet.bib",
+        mimetype="application/x-bibtex"
+    )
