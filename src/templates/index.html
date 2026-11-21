@@ -4,7 +4,7 @@
         <title>LaTeX viitteiden hallinta</title>
     </head>
 
-    </body>
+    <body>
         <h1>Viiteluettelo</h1>
         <div><a href="/bibtex">Luo BibTeX tiedosto</a></div>
         <div><a href="/books/new">Lisää kirja</a></div>
@@ -14,6 +14,16 @@
                 <p role="status">{{ message }}</p>
             {% endfor %}
         {% endwith %}
+
+        <form action="/" method="get" role="search">
+            <label for="search">Hae lähdeviitteitä</label>
+            <input id="search" name="q" type="search"
+                   value="{{ query if query else '' }}" placeholder="Hakusana">
+            <button type="submit">Hae</button>
+            {% if query %}
+            <a href="/">Tyhjennä haku</a>
+            {% endif %}
+        </form>
 
         {% if books %}
         <table>
@@ -45,6 +55,8 @@
                 {% endfor %}
             </tbody>
         </table>
+        {% elif query %}
+        <p role="status">Hakutuloksia ei löydy.</p>
         {% else %}
         <p>Ei vielä lisättyjä lähteitä.</p>
         {% endif %}
