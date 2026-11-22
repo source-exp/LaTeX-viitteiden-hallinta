@@ -1,7 +1,7 @@
 import io
 import flask
 from config import app
-from db_helper import add, db, delete, get_all
+from db_helper import add, db, delete, get_all, get_by_id, update
 from sqlalchemy.exc import IntegrityError
 import bibtex
 
@@ -73,6 +73,46 @@ def delete_book(book_id):
     """Delete a book and redirect to the front page."""
     delete(book_id)
     return flask.redirect("/")
+
+
+@app.route("/books/<int:book_id>/edit")
+def edit_book(book_id):
+    """Render the form for editing an existing book."""
+    book = get_by_id(book_id)
+    if book is None:
+        flask.abort(404)
+    return flask.render_template("edit_book.html", book=book)
+
+
+@app.route("/books/<int:book_id>/edit", methods=["POST"])
+@app.route("/books/<int:book_id>/update", methods=["POST"])
+def update_book(book_id):
+    """Update an existing book and redirect to the front page."""
+    book = get_by_id(book_id)
+    if book is None:
+        flask.abort(404)
+
+    updated_book, error = validate_book_data(flask.request.form)
+    if error:
+        return flask.render_template(
+            "edit_book.html",
+            error=error,
+            book=flask.request.form,
+        ), 400
+
+    try:
+        update(book_id, **updated_book)
+    except IntegrityError:
+        db.session.rollback()
+        return flask.render_template(
+            "edit_book.html",
+            error="Viiteavain on jo käytössä.",
+            book=flask.request.form,
+        ), 400
+
+    flask.flash("Kirjan tiedot päivitettiin onnistuneesti.")
+    return flask.redirect("/")
+
 
 @app.route("/bibtex")
 def generate_bibtex():
