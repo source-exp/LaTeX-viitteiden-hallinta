@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <title>Muokkaa kirjaa</title>
+</head>
+<body>
+    <h1>Muokkaa kirjaa</h1>
+
+    {% if error %}
+        <p role="alert">{{ error }}</p>
+    {% endif %}
+
+    <form action="/books/{{ book.id if book.id is defined else book.get('id') }}/update" method="post">
+        <label for="cite_key">Viiteavain</label>
+        <input id="cite_key" name="cite_key" type="text"
+               value="{{ book.cite_key if book.cite_key is defined else book.get('cite_key', '') }}" required>
+
+        <label for="author">Tekijä</label>
+        <input id="author" name="author" type="text"
+               value="{{ book.author if book.author is defined else book.get('author', '') }}" required>
+
+        <label for="title">Nimi</label>
+        <input id="title" name="title" type="text"
+               value="{{ book.title if book.title is defined else book.get('title', '') }}" required>
+
+        <label for="year">Julkaisuvuosi</label>
+        <input id="year" name="year" type="number"
+               value="{{ book.year if book.year is defined else book.get('year', '') }}" required>
+
+        <label for="publisher">Kustantaja</label>
+        <input id="publisher" name="publisher" type="text"
+               value="{{ book.publisher if book.publisher is defined else book.get('publisher', '') }}" required>
+
+        <button type="submit">Tallenna muutokset</button>
+    </form>
+
+    <a href="/">Takaisin etusivulle</a>
+</body>
+</html>

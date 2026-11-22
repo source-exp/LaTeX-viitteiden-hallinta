@@ -46,6 +46,7 @@
                     <td>{{ book.year }}</td>
                     <td>{{ book.publisher }}</td>
                     <td>
+                        <a href="/books/{{ book.id }}/edit">Muokkaa</a>
                         <form action="/books/{{ book.id }}/delete" method="post"
                             onsubmit="return confirm('Poistetaanko lähde?');">
                             <button type="submit">Poista</button>
