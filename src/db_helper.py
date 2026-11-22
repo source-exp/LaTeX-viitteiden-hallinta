@@ -97,6 +97,18 @@ def get_all():
     )
     return db.session.execute(sql).mappings().all()
 
+
+def get_by_id(book_id):
+    """Return a book reference by id, or None if it does not exist."""
+    sql = text(
+        "SELECT id, cite_key, author, title, year, publisher "
+        "FROM books WHERE id = :id"
+    )
+    return db.session.execute(
+        sql, {"id": book_id}
+    ).mappings().first()
+
+
 def delete(book_id):
     """Delete a book reference by id."""
     sql = text("DELETE FROM books WHERE id = :id")
