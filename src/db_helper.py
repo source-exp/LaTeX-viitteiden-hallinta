@@ -4,7 +4,11 @@ import os
 
 
 def reset_db():
-    print("Clearing contents from table books")
+    print("Clearing contents from reference tables")
+    sql = text("DELETE FROM conference_articles")
+    db.session.execute(sql)
+    sql = text("DELETE FROM articles")
+    db.session.execute(sql)
     sql = text("DELETE FROM books")
     db.session.execute(sql)
     db.session.commit()
@@ -40,8 +44,10 @@ def setup_db():
     with open(schema_path, "r", encoding="utf-8") as f:
         schema_sql = f.read().strip()
 
-    sql = text(schema_sql)
-    db.session.execute(sql)
+    for statement in schema_sql.split(";"):
+        statement = statement.strip()
+        if statement:
+            db.session.execute(text(statement))
     db.session.commit()
 
 
@@ -113,6 +119,167 @@ def delete(book_id):
     """Delete a book reference by id."""
     sql = text("DELETE FROM books WHERE id = :id")
     db.session.execute(sql, {"id": book_id})
+    db.session.commit()
+
+
+def add_article(cite_key, author, title, journal, year,
+                volume=None, number=None, pages=None):
+    """Add an article reference to the database and return its id."""
+    sql = text(
+        """
+        INSERT INTO articles
+            (cite_key, author, title, journal, year, volume, number, pages)
+        VALUES
+            (:cite_key, :author, :title, :journal, :year,
+             :volume, :number, :pages)
+        """
+    )
+    result = db.session.execute(sql, {
+        "cite_key": cite_key,
+        "author": author,
+        "title": title,
+        "journal": journal,
+        "year": year,
+        "volume": volume,
+        "number": number,
+        "pages": pages,
+    })
+    db.session.commit()
+    return result.lastrowid
+
+
+def update_article(article_id, cite_key, author, title, journal, year,
+                   volume=None, number=None, pages=None):
+    """Update an article reference by id."""
+    sql = text(
+        """
+        UPDATE articles
+        SET cite_key = :cite_key,
+            author = :author,
+            title = :title,
+            journal = :journal,
+            year = :year,
+            volume = :volume,
+            number = :number,
+            pages = :pages
+        WHERE id = :id
+        """
+    )
+    result = db.session.execute(sql, {
+        "id": article_id,
+        "cite_key": cite_key,
+        "author": author,
+        "title": title,
+        "journal": journal,
+        "year": year,
+        "volume": volume,
+        "number": number,
+        "pages": pages,
+    })
+    db.session.commit()
+    return result.rowcount
+
+
+def get_all_articles():
+    """Return all article references, newest first."""
+    sql = text(
+        "SELECT id, cite_key, author, title, journal, year, "
+        "volume, number, pages FROM articles ORDER BY id DESC"
+    )
+    return db.session.execute(sql).mappings().all()
+
+
+def get_article_by_id(article_id):
+    """Return an article reference by id, or None if it does not exist."""
+    sql = text(
+        "SELECT id, cite_key, author, title, journal, year, "
+        "volume, number, pages FROM articles WHERE id = :id"
+    )
+    return db.session.execute(
+        sql, {"id": article_id}
+    ).mappings().first()
+
+
+def delete_article(article_id):
+    """Delete an article reference by id."""
+    sql = text("DELETE FROM articles WHERE id = :id")
+    db.session.execute(sql, {"id": article_id})
+    db.session.commit()
+
+
+def add_conference_article(cite_key, author, title, year, booktitle):
+    """Add a conference article reference and return its id."""
+    sql = text(
+        """
+        INSERT INTO conference_articles
+            (cite_key, author, title, year, booktitle)
+        VALUES
+            (:cite_key, :author, :title, :year, :booktitle)
+        """
+    )
+    result = db.session.execute(sql, {
+        "cite_key": cite_key,
+        "author": author,
+        "title": title,
+        "year": year,
+        "booktitle": booktitle,
+    })
+    db.session.commit()
+    return result.lastrowid
+
+
+def update_conference_article(conference_article_id, cite_key,
+                              author, title, year, booktitle):
+    """Update a conference article reference by id."""
+    sql = text(
+        """
+        UPDATE conference_articles
+        SET cite_key = :cite_key,
+            author = :author,
+            title = :title,
+            year = :year,
+            booktitle = :booktitle
+        WHERE id = :id
+        """
+    )
+    result = db.session.execute(sql, {
+        "id": conference_article_id,
+        "cite_key": cite_key,
+        "author": author,
+        "title": title,
+        "year": year,
+        "booktitle": booktitle,
+    })
+    db.session.commit()
+    return result.rowcount
+
+
+def get_all_conference_articles():
+    """Return all conference article references, newest first."""
+    sql = text(
+        "SELECT id, cite_key, author, title, year, booktitle "
+        "FROM conference_articles ORDER BY id DESC"
+    )
+    return db.session.execute(sql).mappings().all()
+
+
+def get_conference_article_by_id(conference_article_id):
+    """Return a conference article by id, or None if it does not exist."""
+    sql = text(
+        "SELECT id, cite_key, author, title, year, booktitle "
+        "FROM conference_articles WHERE id = :id"
+    )
+    return db.session.execute(
+        sql, {"id": conference_article_id}
+    ).mappings().first()
+
+
+def delete_conference_article(conference_article_id):
+    """Delete a conference article reference by id."""
+    sql = text(
+        "DELETE FROM conference_articles WHERE id = :id"
+    )
+    db.session.execute(sql, {"id": conference_article_id})
     db.session.commit()
 
 def search_books(author=None, title=None, year=None):
