@@ -7,7 +7,7 @@
     <body>
         <h1>Viiteluettelo</h1>
         <div><a href="/bibtex">Luo BibTeX tiedosto</a></div>
-        <div><a href="/books/new">Lisää kirja</a></div>
+        <div><a href="/books/new">Lisää viite</a></div>
 
         {% with messages = get_flashed_messages() %}
             {% for message in messages %}
@@ -25,29 +25,69 @@
             {% endif %}
         </form>
 
-        {% if books %}
+        {% set reference_count =
+            (references.book | length) +
+            (references.article | length) +
+            (references.conference_article | length) %}
+        {% if reference_count %}
         <table>
             <thead>
                 <tr>
+                    <th>Tyyppi</th>
                     <th>Viiteavain</th>
                     <th>Tekijä</th>
                     <th>Nimi</th>
                     <th>Vuosi</th>
-                    <th>Kustantaja</th>
+                    <th>Lisätiedot</th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
-                {% for book in books %}
+                {% for book in references.book %}
                 <tr>
+                    <td>Kirja</td>
                     <td>{{ book.cite_key }}</td>
                     <td>{{ book.author }}</td>
                     <td>{{ book.title }}</td>
                     <td>{{ book.year }}</td>
                     <td>{{ book.publisher }}</td>
                     <td>
-                        <a href="/books/{{ book.id }}/edit">Muokkaa</a>
-                        <form action="/books/{{ book.id }}/delete" method="post"
+                        <a href="/books/{{ book.id }}/edit?type=book">Muokkaa</a>
+                        <form action="/books/{{ book.id }}/delete?type=book" method="post"
+                            onsubmit="return confirm('Poistetaanko lähde?');">
+                            <button type="submit">Poista</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% for article in references.article %}
+                <tr>
+                    <td>Artikkeli</td>
+                    <td>{{ article.cite_key }}</td>
+                    <td>{{ article.author }}</td>
+                    <td>{{ article.title }}</td>
+                    <td>{{ article.year }}</td>
+                    <td>{{ article.journal }}{% if article.volume %}, {{ article.volume }}{% endif %}{% if article.number %}({{ article.number }}){% endif %}{% if article.pages %}, {{ article.pages }}{% endif %}</td>
+                    <td>
+                        <a href="/books/{{ article.id }}/edit?type=article">Muokkaa</a>
+                        <form action="/books/{{ article.id }}/delete?type=article" method="post"
+                            onsubmit="return confirm('Poistetaanko lähde?');">
+                            <button type="submit">Poista</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% for conference_article in references.conference_article %}
+                <tr>
+                    <td>Konferenssiartikkeli</td>
+                    <td>{{ conference_article.cite_key }}</td>
+                    <td>{{ conference_article.author }}</td>
+                    <td>{{ conference_article.title }}</td>
+                    <td>{{ conference_article.year }}</td>
+                    <td>{{ conference_article.booktitle }}</td>
+                    <td>
+                        <a href="/books/{{ conference_article.id }}/edit?type=conference_article">Muokkaa</a>
+                        <form action="/books/{{ conference_article.id }}/delete?type=conference_article" method="post"
                             onsubmit="return confirm('Poistetaanko lähde?');">
                             <button type="submit">Poista</button>
                         </form>
