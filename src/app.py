@@ -8,8 +8,12 @@ from db_helper import (
     db,
     delete,
     get_all,
+    get_article_by_id,
+    get_conference_article_by_id,
     get_by_id,
     update,
+    update_article,
+    update_conference_article,
     search_books,
 )
 from sqlalchemy.exc import IntegrityError
@@ -217,39 +221,102 @@ def delete_book(book_id):
 @app.route("/books/<int:book_id>/edit")
 def edit_book(book_id):
     """Render the form for editing an existing book."""
-    book = get_by_id(book_id)
-    if book is None:
+    reference_type = flask.request.args.get("type", "book")
+    aliases = {
+        "conference": "conference_article",
+        "inproceedings": "conference_article",
+        "konferenssiartikkeli": "conference_article",
+        "artikkeli": "article",
+        "kirja": "book",
+    }
+    reference_type = aliases.get(reference_type, reference_type)
+
+    if reference_type == "article":
+        reference = get_article_by_id(book_id)
+    elif reference_type == "conference_article":
+        reference = get_conference_article_by_id(book_id)
+    elif reference_type == "book":
+        reference = get_by_id(book_id)
+    else:
         flask.abort(404)
-    return flask.render_template("edit_book.html", book=book)
+
+    if reference is None:
+        flask.abort(404)
+    return flask.render_template(
+        "edit_book.html",
+        book=reference,
+        reference_type=reference_type,
+    )
 
 
 @app.route("/books/<int:book_id>/edit", methods=["POST"])
 @app.route("/books/<int:book_id>/update", methods=["POST"])
 def update_book(book_id):
-    """Update an existing book and redirect to the front page."""
-    book = get_by_id(book_id)
-    if book is None:
+    """Update an existing reference and redirect to the front page."""
+    reference_type = (
+        flask.request.form.get("reference_type")
+        or flask.request.args.get("type")
+        or "book"
+    )
+    aliases = {
+        "conference": "conference_article",
+        "inproceedings": "conference_article",
+        "konferenssiartikkeli": "conference_article",
+        "artikkeli": "article",
+        "kirja": "book",
+    }
+    reference_type = aliases.get(reference_type, reference_type)
+
+    validators = {
+        "book": validate_book_data,
+        "article": validate_article_data,
+        "conference_article": validate_conference_article_data,
+    }
+    validator = validators.get(reference_type)
+    if validator is None:
+        return flask.render_template(
+            "edit_book.html",
+            error="Tuntematon viitteen tyyppi.",
+            book=flask.request.form,
+            reference_type="book",
+        ), 400
+
+    reference = flask.request.form
+    if reference_type == "article":
+        if get_article_by_id(book_id) is None:
+            flask.abort(404)
+    elif reference_type == "conference_article":
+        if get_conference_article_by_id(book_id) is None:
+            flask.abort(404)
+    elif get_by_id(book_id) is None:
         flask.abort(404)
 
-    updated_book, error = validate_book_data(flask.request.form)
+    updated_reference, error = validator(reference)
     if error:
         return flask.render_template(
             "edit_book.html",
             error=error,
-            book=flask.request.form,
+            book=reference,
+            reference_type=reference_type,
         ), 400
 
     try:
-        update(book_id, **updated_book)
+        if reference_type == "article":
+            update_article(book_id, **updated_reference)
+        elif reference_type == "conference_article":
+            update_conference_article(book_id, **updated_reference)
+        else:
+            update(book_id, **updated_reference)
     except IntegrityError:
         db.session.rollback()
         return flask.render_template(
             "edit_book.html",
             error="Viiteavain on jo käytössä.",
-            book=flask.request.form,
+            book=reference,
+            reference_type=reference_type,
         ), 400
 
-    flask.flash("Kirjan tiedot päivitettiin onnistuneesti.")
+    flask.flash("Viitteen tiedot päivitettiin onnistuneesti.")
     return flask.redirect("/")
 
 

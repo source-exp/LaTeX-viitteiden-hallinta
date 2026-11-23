@@ -2,16 +2,19 @@
 <html lang="fi">
 <head>
     <meta charset="UTF-8">
-    <title>Muokkaa kirjaa</title>
+    <title>Muokkaa viitettä</title>
 </head>
 <body>
-    <h1>Muokkaa kirjaa</h1>
+    <h1>Muokkaa viitettä</h1>
 
     {% if error %}
         <p role="alert">{{ error }}</p>
     {% endif %}
 
     <form action="/books/{{ book.id if book.id is defined else book.get('id') }}/update" method="post">
+        <input type="hidden" name="reference_type"
+               value="{{ reference_type }}">
+
         <label for="cite_key">Viiteavain</label>
         <input id="cite_key" name="cite_key" type="text"
                value="{{ book.cite_key if book.cite_key is defined else book.get('cite_key', '') }}" required>
@@ -28,9 +31,31 @@
         <input id="year" name="year" type="number"
                value="{{ book.year if book.year is defined else book.get('year', '') }}" required>
 
-        <label for="publisher">Kustantaja</label>
-        <input id="publisher" name="publisher" type="text"
-               value="{{ book.publisher if book.publisher is defined else book.get('publisher', '') }}" required>
+        {% if reference_type == "book" %}
+            <label for="publisher">Kustantaja</label>
+            <input id="publisher" name="publisher" type="text"
+                   value="{{ book.publisher if book.publisher is defined else book.get('publisher', '') }}" required>
+        {% elif reference_type == "article" %}
+            <label for="journal">Julkaisu</label>
+            <input id="journal" name="journal" type="text"
+                   value="{{ book.journal if book.journal is defined else book.get('journal', '') }}" required>
+
+            <label for="volume">Volyymi</label>
+            <input id="volume" name="volume" type="text"
+                   value="{{ book.volume if book.volume is defined else book.get('volume', '') }}">
+
+            <label for="number">Numero</label>
+            <input id="number" name="number" type="text"
+                   value="{{ book.number if book.number is defined else book.get('number', '') }}">
+
+            <label for="pages">Sivut</label>
+            <input id="pages" name="pages" type="text"
+                   value="{{ book.pages if book.pages is defined else book.get('pages', '') }}">
+        {% elif reference_type == "conference_article" %}
+            <label for="booktitle">Kirja tai konferenssinimi</label>
+            <input id="booktitle" name="booktitle" type="text"
+                   value="{{ book.booktitle if book.booktitle is defined else book.get('booktitle', '') }}" required>
+        {% endif %}
 
         <button type="submit">Tallenna muutokset</button>
     </form>
