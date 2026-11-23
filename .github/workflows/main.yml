@@ -26,7 +26,7 @@ jobs:
       - name: Check Python files
         run: uv run python -m compileall -q src
 
-  tests:
+  robot_tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -42,3 +42,16 @@ jobs:
         run: uv run src/db_helper.py
       - name: Run robot tests
         run: tools/run_robot_tests
+
+  unit_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10.1.0
+        with:
+          python-version: '3.14'
+      - name: Install dependencies
+        run: uv sync
+      - name: Run pytest
+        run: uv run pytest
