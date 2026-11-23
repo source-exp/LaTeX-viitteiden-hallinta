@@ -9,13 +9,29 @@
     <title>Lisää kirja</title>
 </head>
 <body>
-    <h1>Lisää kirja</h1>
+    <h1>Lisää viite</h1>
 
     {% if error %}
         <p role="alert">{{ error }}</p>
     {% endif %}
 
     <form action="/books" method="post">
+        <label for="reference_type">Viitteen tyyppi</label>
+        <select id="reference_type" name="reference_type">
+            <option value="book"
+                    {% if not form or form.get('reference_type', 'book') == 'book' or form.get('type', 'book') == 'book' %}selected{% endif %}>
+                Kirja
+            </option>
+            <option value="article"
+                    {% if form and (form.get('reference_type') == 'article' or form.get('type') == 'article') %}selected{% endif %}>
+                Artikkeli
+            </option>
+            <option value="conference_article"
+                    {% if form and (form.get('reference_type') == 'conference_article' or form.get('type') == 'conference_article') %}selected{% endif %}>
+                Konferenssiartikkeli
+            </option>
+        </select>
+
         <label for="cite_key">Viiteavain</label>
         <input id="cite_key" name="cite_key" type="text"
                value="{{ form.get('cite_key', '') if form else '' }}" required>
@@ -32,12 +48,63 @@
         <input id="year" name="year" type="number"
                value="{{ form.get('year', '') if form else '' }}" required>
 
-        <label for="publisher">Kustantaja</label>
-        <input id="publisher" name="publisher" type="text"
-               value="{{ form.get('publisher', '') if form else '' }}" required>
+        <div id="book-fields">
+            <label for="publisher">Kustantaja</label>
+            <input id="publisher" name="publisher" type="text"
+                   value="{{ form.get('publisher', '') if form else '' }}">
+        </div>
 
-        <button type="submit">Lisää kirja</button>
+        <div id="article-fields">
+            <label for="journal">Julkaisu</label>
+            <input id="journal" name="journal" type="text"
+                   value="{{ form.get('journal', '') if form else '' }}">
+
+            <label for="volume">Volyymi</label>
+            <input id="volume" name="volume" type="text"
+                   value="{{ form.get('volume', '') if form else '' }}">
+
+            <label for="number">Numero</label>
+            <input id="number" name="number" type="text"
+                   value="{{ form.get('number', '') if form else '' }}">
+
+            <label for="pages">Sivut</label>
+            <input id="pages" name="pages" type="text"
+                   value="{{ form.get('pages', '') if form else '' }}">
+        </div>
+
+        <div id="conference-article-fields">
+            <label for="booktitle">Kirja tai konferenssinimi</label>
+            <input id="booktitle" name="booktitle" type="text"
+                   value="{{ form.get('booktitle', '') if form else '' }}">
+        </div>
+
+        <button type="submit">Lisää viite</button>
     </form>
+
+    <script>
+        const referenceType = document.getElementById("reference_type");
+        const bookFields = document.getElementById("book-fields");
+        const articleFields = document.getElementById("article-fields");
+        const conferenceArticleFields =
+            document.getElementById("conference-article-fields");
+
+        function updateReferenceFields() {
+            bookFields.hidden = referenceType.value !== "book";
+            articleFields.hidden = referenceType.value !== "article";
+            conferenceArticleFields.hidden =
+                referenceType.value !== "conference_article";
+
+            document.getElementById("publisher").required =
+                referenceType.value === "book";
+            document.getElementById("journal").required =
+                referenceType.value === "article";
+            document.getElementById("booktitle").required =
+                referenceType.value === "conference_article";
+        }
+
+        referenceType.addEventListener("change", updateReferenceFields);
+        updateReferenceFields();
+    </script>
 
     <a href="/">Takaisin etusivulle</a>
 </body>
