@@ -1,7 +1,7 @@
 import io
 import flask
 from config import app
-from db_helper import add, db, delete, get_all, get_by_id, update
+from db_helper import add, db, delete, get_all, get_by_id, update, search_books
 from sqlalchemy.exc import IntegrityError
 import bibtex
 
@@ -37,8 +37,34 @@ def validate_book_data(form):
 
 @app.route('/')
 def index():
-    books = get_all()
-    return flask.render_template('index.html', books = books)
+    query = flask.request.args.get("q", "").strip()
+    author = flask.request.args.get("author", "").strip()
+    title = flask.request.args.get("title", "").strip()
+    year = flask.request.args.get("year", "").strip()
+
+    if query:
+        found = {}
+        searches = [search_books(author=query), search_books(title=query)]
+        try:
+            int(query)
+            searches.append(search_books(year=query))
+        except ValueError:
+            pass
+
+        for books in searches:
+            for book in books:
+                found[book["id"]] = book
+        books = sorted(found.values(), key=lambda book: book["id"], reverse=True)
+    elif author or title or year:
+        books = search_books(author=author, title=title, year=year)
+    else:
+        books = get_all()
+
+    return flask.render_template(
+        "index.html",
+        books=books,
+        query=query,
+    )
 
 @app.route("/books/new")
 def new_book():
