@@ -8,9 +8,13 @@ from db_helper import (
     db,
     delete,
     get_all,
+    get_all_articles,
+    get_all_conference_articles,
     get_article_by_id,
     get_conference_article_by_id,
     get_by_id,
+    delete_article,
+    delete_conference_article,
     update,
     update_article,
     update_conference_article,
@@ -144,10 +148,20 @@ def index():
         books = search_books(author=author, title=title, year=year)
     else:
         books = get_all()
+        articles = get_all_articles()
+        conference_articles = get_all_conference_articles()
+    if not query and not (author or title or year):
+        references = {
+            "book": list(books),
+            "article": list(articles),
+            "conference_article": list(conference_articles),
+        }
+    else:
+        references = {"book": list(books), "article": [], "conference_article": []}
 
     return flask.render_template(
         "index.html",
-        books=books,
+        references=references,
         query=query,
     )
 
@@ -214,7 +228,13 @@ def create_book():
 @app.route("/books/<int:book_id>/delete", methods=["POST"])
 def delete_book(book_id):
     """Delete a book and redirect to the front page."""
-    delete(book_id)
+    reference_type = flask.request.args.get("type", "book")
+    if reference_type == "article":
+        delete_article(book_id)
+    elif reference_type == "conference_article":
+        delete_conference_article(book_id)
+    else:
+        delete(book_id)
     return flask.redirect("/")
 
 
