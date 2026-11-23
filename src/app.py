@@ -130,6 +130,8 @@ def index():
     author = flask.request.args.get("author", "").strip()
     title = flask.request.args.get("title", "").strip()
     year = flask.request.args.get("year", "").strip()
+    articles = []
+    conference_articles = []
 
     if query:
         found = {}
