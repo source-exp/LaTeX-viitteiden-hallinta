@@ -11,16 +11,12 @@ Add a book
     Get Text  body  not contains  fake test book
 
     # Add the fake book.
-    Click  text="Lisää kirja"
-    Fill Text  id=cite_key   avain
-    Fill Text  id=author     human being
-    Fill Text  id=title      fake test book
-    Fill Text  id=year       1000
-    Fill Text  id=publisher  very real publisher
-    Click  button[type="submit"]
+    Add Reference  book  avain  human being  fake test book  1000
+    ...  publisher=very real publisher
 
-    # The fake book should exist now.
-    Get Text  body  contains  fake test book
+    Reload
+    Reference Row Should Show  avain  Kirja  human being  fake test book  1000
+    ...  very real publisher
 
 Remove a book
     Homepage
@@ -30,7 +26,7 @@ Remove a book
 
     # Remove the fake book
     Handle Future Dialogs  action=accept
-    Click  text=Poista
+    Click  css=tbody tr:has(td:text-is("avain")) >> text="Poista"
 
     # The fake book should not exist anymore.
     Get Text  body  not contains  fake test book
