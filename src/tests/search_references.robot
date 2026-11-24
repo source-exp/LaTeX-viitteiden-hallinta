@@ -15,6 +15,16 @@ Find a book by part of its author name
 Find a book by publication year
     Search Should Return Only The Edited Book  2024
 
+Find a journal article by its title
+    Search Books  Päivitetty nimi
+    Get Element Count  css=tbody tr  ==  3
+    Get Text  css=tbody tr:has(td:text-is("muokkaa-artikkeli-paivitetty")) > td:nth-child(1)  ==  Artikkeli
+
+Find a conference article by its author
+    Search Books  Aino Mallikas
+    Get Element Count  css=tbody tr  ==  3
+    Get Text  css=tbody tr:has(td:text-is("muokkaa-konferenssi-paivitetty")) > td:nth-child(1)  ==  Konferenssiartikkeli
+
 Show a message when no books match
     Search Books  ei-osumia-876
     Get Text  role=status  ==  Hakutuloksia ei löydy.

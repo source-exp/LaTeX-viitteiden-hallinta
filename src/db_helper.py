@@ -282,8 +282,8 @@ def delete_conference_article(conference_article_id):
     db.session.execute(sql, {"id": conference_article_id})
     db.session.commit()
 
-def search_books(author=None, title=None, year=None):
-    """Search books by author, title and year. All filters are combined."""
+def _search_references(table, columns, author=None, title=None, year=None):
+    """Search one reference table by author, title and year."""
     conditions = []
     params = {}
 
@@ -303,16 +303,46 @@ def search_books(author=None, title=None, year=None):
         except (TypeError, ValueError):
             pass
 
-    sql = (
-        "SELECT id, cite_key, author, title, year, publisher "
-        "FROM books"
-    )
+    sql = f"SELECT {columns} FROM {table}"
 
     if conditions:
         sql += " WHERE " + " AND ".join(conditions)
     sql += " ORDER BY id DESC"
 
     return db.session.execute(text(sql), params).mappings().all()
+
+
+def search_books(author=None, title=None, year=None):
+    """Search books by author, title and year. All filters are combined."""
+    return _search_references(
+        "books",
+        "id, cite_key, author, title, year, publisher",
+        author,
+        title,
+        year,
+    )
+
+
+def search_articles(author=None, title=None, year=None):
+    """Search journal articles by author, title and year."""
+    return _search_references(
+        "articles",
+        "id, cite_key, author, title, journal, year, volume, number, pages",
+        author,
+        title,
+        year,
+    )
+
+
+def search_conference_articles(author=None, title=None, year=None):
+    """Search conference articles by author, title and year."""
+    return _search_references(
+        "conference_articles",
+        "id, cite_key, author, title, year, booktitle",
+        author,
+        title,
+        year,
+    )
 
 if __name__ == "__main__":
     with app.app_context():
