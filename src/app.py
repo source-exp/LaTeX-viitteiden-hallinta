@@ -19,6 +19,8 @@ from db_helper import (
     update_article,
     update_conference_article,
     search_books,
+    search_articles,
+    search_conference_articles,
 )
 from sqlalchemy.exc import IntegrityError
 import bibtex
@@ -134,32 +136,44 @@ def index():
     conference_articles = []
 
     if query:
+        search_functions = (
+            (search_books, "books"),
+            (search_articles, "articles"),
+            (search_conference_articles, "conference_articles"),
+        )
         found = {}
-        searches = [search_books(author=query), search_books(title=query)]
-        try:
-            int(query)
-            searches.append(search_books(year=query))
-        except ValueError:
-            pass
-
-        for books in searches:
-            for book in books:
-                found[book["id"]] = book
-        books = sorted(found.values(), key=lambda book: book["id"], reverse=True)
+        for search_function, reference_type in search_functions:
+            results = {}
+            for result in (
+                search_function(author=query),
+                search_function(title=query),
+            ):
+                for reference in result:
+                    results[reference["id"]] = reference
+            if query.isdigit():
+                for reference in search_function(year=query):
+                    results[reference["id"]] = reference
+            found[reference_type] = sorted(
+                results.values(), key=lambda reference: reference["id"], reverse=True
+            )
+        books = found["books"]
+        articles = found["articles"]
+        conference_articles = found["conference_articles"]
     elif author or title or year:
         books = search_books(author=author, title=title, year=year)
+        articles = search_articles(author=author, title=title, year=year)
+        conference_articles = search_conference_articles(
+            author=author, title=title, year=year
+        )
     else:
         books = get_all()
         articles = get_all_articles()
         conference_articles = get_all_conference_articles()
-    if not query and not (author or title or year):
-        references = {
-            "book": list(books),
-            "article": list(articles),
-            "conference_article": list(conference_articles),
-        }
-    else:
-        references = {"book": list(books), "article": [], "conference_article": []}
+    references = {
+        "book": list(books),
+        "article": list(articles),
+        "conference_article": list(conference_articles),
+    }
 
     return flask.render_template(
         "index.html",
