@@ -1,4 +1,5 @@
 import io
+from datetime import date
 import flask
 from config import app
 from db_helper import (
@@ -25,11 +26,60 @@ from db_helper import (
 from sqlalchemy.exc import IntegrityError
 import bibtex
 
+MAX_FIELD_LENGTHS = {
+    "cite_key": 100,
+    "author": 200,
+    "title": 300,
+    "year": 4,
+    "publisher": 500,
+    "journal": 500,
+    "volume": 100,
+    "number": 100,
+    "pages": 100,
+    "booktitle": 300,
+}
+
+FIELD_LABELS = {
+    "cite_key": "Viiteavain",
+    "author": "Tekijä",
+    "title": "Nimi",
+    "year": "Julkaisuvuosi",
+    "publisher": "Kustantaja",
+    "journal": "Julkaisu",
+    "volume": "Volyymi",
+    "number": "Numero",
+    "pages": "Sivut",
+    "booktitle": "Kirja tai konferenssinimi",
+}
+
+
+@app.context_processor
+def inject_current_year():
+    """Make the current year available to forms."""
+    return {"current_year": date.today().year}
+
+
+def validate_field_lengths(reference, field_lengths=None):
+    """Return an error if any reference field exceeds its character limit."""
+    field_lengths = {**MAX_FIELD_LENGTHS, **(field_lengths or {})}
+    for field, value in reference.items():
+        limit = field_lengths[field]
+        if len(value) > limit:
+            return (
+                f"{FIELD_LABELS[field]} saa olla enintään "
+                f"{limit} merkkiä."
+            )
+    return None
+
 
 def validate_book_data(form):
     """Return a cleaned book and an error message, if the data is invalid."""
     fields = ("cite_key", "author", "title", "year", "publisher")
     book = {field: form.get(field, "").strip() for field in fields}
+
+    error = validate_field_lengths(book)
+    if error:
+        return None, error
 
     required_fields = {
         "cite_key": "Viiteavain",
@@ -52,6 +102,11 @@ def validate_book_data(form):
     if book["year"] <= 0:
         return None, "Julkaisuvuoden pitää olla positiivinen kokonaisluku."
 
+    if book["year"] > date.today().year:
+        return None, (
+            f"Julkaisuvuosi ei voi olla vuotta {date.today().year} myöhempi."
+        )
+
     return book, None
 
 
@@ -68,6 +123,10 @@ def validate_article_data(form):
         "pages",
     )
     article = {field: form.get(field, "").strip() for field in fields}
+
+    error = validate_field_lengths(article)
+    if error:
+        return None, error
 
     required_fields = {
         "cite_key": "Viiteavain",
@@ -91,6 +150,11 @@ def validate_article_data(form):
     if article["year"] <= 0:
         return None, "Julkaisuvuoden pitää olla positiivinen kokonaisluku."
 
+    if article["year"] > date.today().year:
+        return None, (
+            f"Julkaisuvuosi ei voi olla vuotta {date.today().year} myöhempi."
+        )
+
     return article, None
 
 
@@ -100,6 +164,10 @@ def validate_conference_article_data(form):
     conference_article = {
         field: form.get(field, "").strip() for field in fields
     }
+
+    error = validate_field_lengths(conference_article)
+    if error:
+        return None, error
 
     required_fields = {
         "cite_key": "Viiteavain",
@@ -122,6 +190,11 @@ def validate_conference_article_data(form):
 
     if conference_article["year"] <= 0:
         return None, "Julkaisuvuoden pitää olla positiivinen kokonaisluku."
+
+    if conference_article["year"] > date.today().year:
+        return None, (
+            f"Julkaisuvuosi ei voi olla vuotta {date.today().year} myöhempi."
+        )
 
     return conference_article, None
 
