@@ -432,7 +432,14 @@ def update_book(book_id):
 @app.route("/bibtex")
 def generate_bibtex():
     return flask.send_file(
-        io.BytesIO(bibtex.generate(get_all()).encode()),
+        io.BytesIO(
+            bibtex.generate(
+                get_all(),
+                get_all_articles(),
+                get_all_conference_articles(),
+            ).encode()
+        ),
         download_name="viitteet.bib",
+        as_attachment=True,
         mimetype="application/x-bibtex"
     )
