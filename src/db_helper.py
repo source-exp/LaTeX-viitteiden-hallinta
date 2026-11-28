@@ -2,6 +2,53 @@ from config import db, app
 from sqlalchemy import text
 import os
 
+SORTABLE_COLUMNS = {
+    "books": {
+        "id": "id",
+        "cite_key": "cite_key",
+        "author": "author",
+        "title": "title",
+        "year": "year",
+        "publisher": "publisher",
+    },
+    "articles": {
+        "id": "id",
+        "cite_key": "cite_key",
+        "author": "author",
+        "title": "title",
+        "year": "year",
+        "journal": "journal",
+        "volume": "volume",
+        "number": "number",
+        "pages": "pages",
+    },
+    "conference_articles": {
+        "id": "id",
+        "cite_key": "cite_key",
+        "author": "author",
+        "title": "title",
+        "year": "year",
+        "booktitle": "booktitle",
+    },
+}
+
+
+def _order_by(table, sort_by, sort_order):
+    """Return a safe ORDER BY clause for a reference table."""
+    columns = SORTABLE_COLUMNS.get(table)
+    if columns is None or sort_by not in columns:
+        raise ValueError(f"Unsupported sort field {sort_by!r} for {table!r}.")
+
+    if not isinstance(sort_order, str) or sort_order.lower() not in {
+        "asc", "desc"
+    }:
+        raise ValueError("Sort order must be 'asc' or 'desc'.")
+
+    clause = f"{columns[sort_by]} {sort_order.upper()}"
+    if sort_by != "id":
+        clause += ", id DESC"
+    return clause
+
 
 def reset_db():
     print("Clearing contents from reference tables")
@@ -95,11 +142,11 @@ def update(book_id, cite_key, author, title, year, publisher):
     return result.rowcount
 
 
-def get_all():
-    """Return all book references, newest first."""
+def get_all(sort_by="id", sort_order="desc"):
+    """Return book references ordered by the selected column."""
     sql = text(
         "SELECT id, cite_key, author, title, year, publisher "
-        "FROM books ORDER BY id DESC"
+        f"FROM books ORDER BY {_order_by('books', sort_by, sort_order)}"
     )
     return db.session.execute(sql).mappings().all()
 
@@ -180,11 +227,12 @@ def update_article(article_id, cite_key, author, title, journal, year,
     return result.rowcount
 
 
-def get_all_articles():
-    """Return all article references, newest first."""
+def get_all_articles(sort_by="id", sort_order="desc"):
+    """Return article references ordered by the selected column."""
     sql = text(
         "SELECT id, cite_key, author, title, journal, year, "
-        "volume, number, pages FROM articles ORDER BY id DESC"
+        "volume, number, pages FROM articles "
+        f"ORDER BY {_order_by('articles', sort_by, sort_order)}"
     )
     return db.session.execute(sql).mappings().all()
 
@@ -254,11 +302,12 @@ def update_conference_article(conference_article_id, cite_key,
     return result.rowcount
 
 
-def get_all_conference_articles():
-    """Return all conference article references, newest first."""
+def get_all_conference_articles(sort_by="id", sort_order="desc"):
+    """Return conference article references ordered by the selected column."""
     sql = text(
         "SELECT id, cite_key, author, title, year, booktitle "
-        "FROM conference_articles ORDER BY id DESC"
+        "FROM conference_articles "
+        f"ORDER BY {_order_by('conference_articles', sort_by, sort_order)}"
     )
     return db.session.execute(sql).mappings().all()
 
@@ -282,7 +331,10 @@ def delete_conference_article(conference_article_id):
     db.session.execute(sql, {"id": conference_article_id})
     db.session.commit()
 
-def _search_references(table, columns, author=None, title=None, year=None):
+def _search_references(
+    table, columns, author=None, title=None, year=None,
+    sort_by="id", sort_order="desc",
+):
     """Search one reference table by author, title and year."""
     conditions = []
     params = {}
@@ -307,12 +359,14 @@ def _search_references(table, columns, author=None, title=None, year=None):
 
     if conditions:
         sql += " WHERE " + " AND ".join(conditions)
-    sql += " ORDER BY id DESC"
+    sql += f" ORDER BY {_order_by(table, sort_by, sort_order)}"
 
     return db.session.execute(text(sql), params).mappings().all()
 
 
-def search_books(author=None, title=None, year=None):
+def search_books(
+    author=None, title=None, year=None, sort_by="id", sort_order="desc"
+):
     """Search books by author, title and year. All filters are combined."""
     return _search_references(
         "books",
@@ -320,10 +374,14 @@ def search_books(author=None, title=None, year=None):
         author,
         title,
         year,
+        sort_by,
+        sort_order,
     )
 
 
-def search_articles(author=None, title=None, year=None):
+def search_articles(
+    author=None, title=None, year=None, sort_by="id", sort_order="desc"
+):
     """Search journal articles by author, title and year."""
     return _search_references(
         "articles",
@@ -331,10 +389,14 @@ def search_articles(author=None, title=None, year=None):
         author,
         title,
         year,
+        sort_by,
+        sort_order,
     )
 
 
-def search_conference_articles(author=None, title=None, year=None):
+def search_conference_articles(
+    author=None, title=None, year=None, sort_by="id", sort_order="desc"
+):
     """Search conference articles by author, title and year."""
     return _search_references(
         "conference_articles",
@@ -342,6 +404,8 @@ def search_conference_articles(author=None, title=None, year=None):
         author,
         title,
         year,
+        sort_by,
+        sort_order,
     )
 
 if __name__ == "__main__":
