@@ -17,43 +17,53 @@
 
         <label for="cite_key">Viiteavain</label>
         <input id="cite_key" name="cite_key" type="text"
+               maxlength="100"
                value="{{ book.cite_key if book.cite_key is defined else book.get('cite_key', '') }}" required>
 
         <label for="author">Tekijä</label>
         <input id="author" name="author" type="text"
+               maxlength="200"
                value="{{ book.author if book.author is defined else book.get('author', '') }}" required>
 
         <label for="title">Nimi</label>
         <input id="title" name="title" type="text"
+               maxlength="300"
                value="{{ book.title if book.title is defined else book.get('title', '') }}" required>
 
         <label for="year">Julkaisuvuosi</label>
         <input id="year" name="year" type="number"
+               min="1" max="{{ current_year }}"
                value="{{ book.year if book.year is defined else book.get('year', '') }}" required>
 
         {% if reference_type == "book" %}
             <label for="publisher">Kustantaja</label>
             <input id="publisher" name="publisher" type="text"
+                   maxlength="500"
                    value="{{ book.publisher if book.publisher is defined else book.get('publisher', '') }}" required>
         {% elif reference_type == "article" %}
             <label for="journal">Julkaisu</label>
             <input id="journal" name="journal" type="text"
+                   maxlength="500"
                    value="{{ book.journal if book.journal is defined else book.get('journal', '') }}" required>
 
             <label for="volume">Volyymi</label>
             <input id="volume" name="volume" type="text"
+                   maxlength="100"
                    value="{{ book.volume if book.volume is defined else book.get('volume', '') }}">
 
             <label for="number">Numero</label>
             <input id="number" name="number" type="text"
+                   maxlength="100"
                    value="{{ book.number if book.number is defined else book.get('number', '') }}">
 
             <label for="pages">Sivut</label>
             <input id="pages" name="pages" type="text"
+                   maxlength="100"
                    value="{{ book.pages if book.pages is defined else book.get('pages', '') }}">
         {% elif reference_type == "conference_article" %}
             <label for="booktitle">Kirja tai konferenssinimi</label>
             <input id="booktitle" name="booktitle" type="text"
+                   maxlength="300"
                    value="{{ book.booktitle if book.booktitle is defined else book.get('booktitle', '') }}" required>
         {% endif %}
 

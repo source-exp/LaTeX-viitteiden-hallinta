@@ -34,47 +34,57 @@
 
         <label for="cite_key">Viiteavain</label>
         <input id="cite_key" name="cite_key" type="text"
+               maxlength="100"
                value="{{ form.get('cite_key', '') if form else '' }}" required>
 
         <label for="author">Tekijä</label>
         <input id="author" name="author" type="text"
+               maxlength="200"
                value="{{ form.get('author', '') if form else '' }}" required>
 
         <label for="title">Nimi</label>
         <input id="title" name="title" type="text"
+               maxlength="300"
                value="{{ form.get('title', '') if form else '' }}" required>
 
         <label for="year">Julkaisuvuosi</label>
         <input id="year" name="year" type="number"
+               min="1" max="{{ current_year }}"
                value="{{ form.get('year', '') if form else '' }}" required>
 
         <div id="book-fields">
             <label for="publisher">Kustantaja</label>
             <input id="publisher" name="publisher" type="text"
+                   maxlength="500"
                    value="{{ form.get('publisher', '') if form else '' }}">
         </div>
 
         <div id="article-fields">
             <label for="journal">Julkaisu</label>
             <input id="journal" name="journal" type="text"
+                   maxlength="500"
                    value="{{ form.get('journal', '') if form else '' }}">
 
             <label for="volume">Volyymi</label>
             <input id="volume" name="volume" type="text"
+                   maxlength="100"
                    value="{{ form.get('volume', '') if form else '' }}">
 
             <label for="number">Numero</label>
             <input id="number" name="number" type="text"
+                   maxlength="100"
                    value="{{ form.get('number', '') if form else '' }}">
 
             <label for="pages">Sivut</label>
             <input id="pages" name="pages" type="text"
+                   maxlength="100"
                    value="{{ form.get('pages', '') if form else '' }}">
         </div>
 
         <div id="conference-article-fields">
             <label for="booktitle">Kirja tai konferenssinimi</label>
             <input id="booktitle" name="booktitle" type="text"
+                   maxlength="300"
                    value="{{ form.get('booktitle', '') if form else '' }}">
         </div>
 
@@ -93,7 +103,6 @@
             articleFields.hidden = referenceType.value !== "article";
             conferenceArticleFields.hidden =
                 referenceType.value !== "conference_article";
-
             document.getElementById("publisher").required =
                 referenceType.value === "book";
             document.getElementById("journal").required =
